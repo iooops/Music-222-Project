@@ -1,0 +1,113 @@
+{
+  "preset": "water",
+  "remembered": {
+    "Default": {
+      "0": {
+        "range": 2.345207879911715,
+        "azimuth": 0.5880026035475675,
+        "elevation": 0.8768157318939026,
+        "sourceX": 1.5,
+        "sourceY": 1,
+        "sourceZ": 1.5,
+        "listenerRX": 0,
+        "listenerRY": 0,
+        "listenerRZ": 0,
+        "listenerX": 0,
+        "listenerY": 0,
+        "listenerZ": 0,
+        "width": 4,
+        "height": 4,
+        "depth": 4,
+        "left": "uniform",
+        "right": "uniform",
+        "front": "uniform",
+        "back": "uniform",
+        "up": "uniform",
+        "down": "uniform"
+      }
+    },
+    "grass": {
+      "0": {
+        "range": 2.345207879911715,
+        "azimuth": 0.5880026035475675,
+        "elevation": 0.8768157318939026,
+        "sourceX": 1.5,
+        "sourceY": 1,
+        "sourceZ": 1.5,
+        "listenerRX": 0,
+        "listenerRY": 0,
+        "listenerRZ": 0,
+        "listenerX": 0,
+        "listenerY": 0,
+        "listenerZ": 0,
+        "width": 4,
+        "height": 4,
+        "depth": 4,
+        "left": "transparent",
+        "right": "transparent",
+        "front": "transparent",
+        "back": "transparent",
+        "up": "transparent",
+        "down": "grass"
+      }
+    },
+    "water": {
+      "0": {
+        "range": 2.345207879911715,
+        "azimuth": 1.7,
+        "elevation": 0.8768157318939026,
+        "sourceX": -0.23227771537187078,
+        "sourceY": 1.7877491610798268,
+        "sourceZ": 1.5000000000000002,
+        "listenerRX": 0,
+        "listenerRY": 0,
+        "listenerRZ": 0,
+        "listenerX": 0,
+        "listenerY": 0,
+        "listenerZ": 0,
+        "width": 10,
+        "height": 10,
+        "depth": 10,
+        "left": "transparent",
+        "right": "transparent",
+        "front": "transparent",
+        "back": "transparent",
+        "up": "transparent",
+        "down": "water-or-ice-surface"
+      }
+    }
+  },
+  "closed": false,
+  "folders": {
+    "Source Position(Spherical)": {
+      "preset": "Default",
+      "closed": false,
+      "folders": {}
+    },
+    "Source Position(Cartesian)": {
+      "preset": "Default",
+      "closed": true,
+      "folders": {}
+    },
+    "Listener Rotation": {
+      "preset": "Default",
+      "closed": false,
+      "folders": {}
+    },
+    "Listener Position": {
+      "preset": "Default",
+      "closed": true,
+      "folders": {}
+    },
+    "Room Dimensions (in meters)": {
+      "preset": "Default",
+      "closed": false,
+      "folders": {}
+    },
+    "Room Material Coefficients": {
+      "preset": "Default",
+      "closed": true,
+      "folders": {}
+    }
+  }
+}
