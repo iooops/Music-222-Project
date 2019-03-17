@@ -4,7 +4,7 @@ var mesh, renderer, scene, camera, controls;
 let room, roomOuter, listener, soundSource;
 
 let audioContext;
-let audioElement, audioElementSource, audioBufferSource;
+let audioElement, audioElementSource, audioBufferSource, gainNode;
 let source;
 let audioScene;
 let mat;
@@ -58,7 +58,8 @@ const TEXTURES = {
     UNIFORM: prefix + 'acoustic_ceiling_one.jpg',
     GLASS_THICK: prefix + 'glass_thick.jpg'
 };
-let prev;
+let previous, myInterval, m = new THREE.Matrix4();
+let currPreset;
 
 init();
 animate();
@@ -72,12 +73,20 @@ function initAudio() {
     });
     source = audioScene.createSource();
     audioBufferSource = audioContext.createBufferSource();
-    audioBufferSource.connect(source.input);
+    
+    gainNode = audioContext.createGain();
+    audioBufferSource.connect(gainNode);
+    gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+
+    gainNode.connect(source.input);
+
     audioScene.output.connect(audioContext.destination);
-    audioScene.output.channelCount = 4;
-    audioScene.output.channelCountMode = 'max';
-    console.log(audioScene.output.channelCount);
+    
+    // audioScene.output.channelCount = 4;
+    // audioScene.output.channelCountMode = 'max';
+    // console.log(audioScene.output.channelCount);
     // audioContext.destination.channelCount = 4;
+
     audioScene.setListenerPosition(listenerPos.x,
         listenerPos.y,
         listenerPos.z);
@@ -86,6 +95,7 @@ function initAudio() {
         sourcePos.z);
 
     var request = new XMLHttpRequest();
+    // request.open('GET', 'audio/Chopin-nocturne-op-9-no-1.wav', true);
     request.open('GET', 'audio/music.wav', true);
     request.responseType = 'arraybuffer';
     request.onload = function() {
@@ -130,7 +140,6 @@ function setupControls() {
                 audioScene.output.disconnect();
                 playing = false;
             }
-            
         };
         this.range = Math.sqrt(sourcePos.x * sourcePos.x +
             sourcePos.y * sourcePos.y +
@@ -158,7 +167,7 @@ function setupControls() {
     };
 
     var text = new FizzyText();
-    var gui = new dat.GUI({autoplace: false, width: 300});
+    var gui = new dat.GUI({autoplace: false, width: 300, load: currPreset});
     gui.remember(text);
 
     // source 
@@ -184,26 +193,68 @@ function setupControls() {
         dimensions.depth/2 - offset).step(0.01).listen();
     // srcPos1.open();
 
+    // console.log(m);
+    // var smoothTrans = function(curr, prev, time) {
+    //     clearInterval(myInterval);
+    //     // console.log(prev);
+    //     if (m.elements !== prev) {
+    //         prev = m.elements;
+    //     }
+    //     // console.log(prev);
+    //     var diff = curr.map((item, index) => {
+    //         return item - prev[index];
+    //     });
+    //     var step = diff.map((item) => {
+    //         return item*10/time;
+    //     });
+    //     var i = 1;
+    //     while (i <= 10) {
+    //         m.elements = prev.map((item, index) => {
+    //             return item + i*step[index];
+    //         });
+    //     }
+    //     // var x = 0.01, timePassed = 0, end = true;
+    //     // myInterval = setInterval(function() {
+    //     //     // m.elements = prev.map((item, index) => {
+    //     //     //     return item + i*step[index];
+    //     //     // });
+    //     //     timePassed += 10;
+    //     //     diff = curr.map((item, index) => {
+    //     //         return item - m.elements[index];
+    //     //     });
+    //     //     // console.log(diff);
+    //     //     m.elements = m.elements.map((item, index) => {
+    //     //         return item + x * diff[index];
+    //     //     });
+    //     //     source.setFromMatrix(m);
+    //     //     diff.forEach(d => {
+    //     //         if (Math.abs(d) > 0.001) {
+    //     //             end = false;
+    //     //         } 
+    //     //     });
+    //     //     // if (timePassed === time) {
+    //     //     if (end) {
+    //     //         console.log("!!!");
+    //     //         m.elements = curr;
+    //     //         source.setFromMatrix(m);
+    //     //         clearInterval(myInterval);
+    //     //         end = true;
+    //     //     }
+    //     //     // i++;
+    //     //     // if (i === time*0.1-1) clearInterval(myInterval);
+    //     // }, 10);
+    // }
+
     var resetSourceMatrix = function() {
         text.range = Math.sqrt(sourcePos.x * sourcePos.x +
             sourcePos.y * sourcePos.y +
             sourcePos.z * sourcePos.z);
         text.azimuth = Math.atan(sourcePos.y/sourcePos.x);
         text.elevation = Math.acos(sourcePos.z/text.range);
-        console.log(soundSource.matrix);
+        // console.log(soundSource.matrix);
         source.setFromMatrix(soundSource.matrix);
-    }
-
-    var myInterval;
-    var smoothTrans = function(curr, prev) {
-        clearInterval(myInterval);
-        var diff = curr.map((item, i) => {
-            return item - prev[i];
-        });
-        var i = 0;
-        myInterval = setInterval(function() {
-            source.setFromMatrix();
-        }, 10);
+        // smoothTrans(soundSource.matrix.elements, previous, 100);
+        // previous = soundSource.matrix.elements.slice();
     }
 
     var resetSourceMatrixFromSpherical = function(x, y, z) {
@@ -213,13 +264,15 @@ function setupControls() {
         sourcePos = { x: x, y: y, z: z };
         soundSource.position.set(x, y, z);
         source.setFromMatrix(soundSource.matrix);
-        for (var i = 0; i < 16; i++) {
-            console.log(soundSource.matrix.elements[i] - prev[i]);
-        }
-        console.log(soundSource.matrix.elements);
-        console.log(prev);
-        prev = soundSource.matrix.elements.slice();
-        // source.setPosition(x, y, z);
+        // console.log(soundSource.matrix.elements);
+        // smoothTrans(soundSource.matrix.elements, previous, 100);
+        // previous = soundSource.matrix.elements.slice();
+        // for (var i = 0; i < 16; i++) {
+        //     console.log(soundSource.matrix.elements[i] - prev[i]);
+        // }
+        // // console.log(soundSource.matrix.elements);
+        // // console.log(prev);
+        // // source.setPosition(x, y, z);
     }
 
     range.onChange(function(value) {
@@ -247,6 +300,14 @@ function setupControls() {
         sourcePos.x = value;
         soundSource.position.x = value;
         resetSourceMatrix();
+        // console.log(soundSource.matrix.elements);
+        // smoothTrans(soundSource.matrix.elements, prev, 0.1);
+        // // for (var i = 0; i < 16; i++) {
+        // //     console.log(soundSource.matrix.elements[i] - prev[i]);
+        // // }
+        // // console.log(soundSource.matrix.elements);
+        // // console.log(prev);
+        // prev = soundSource.matrix.elements.slice();
     });
 
     sourceY.onChange(function(value) {
@@ -539,7 +600,8 @@ function setupSource() {
         sourcePos.y,
         sourcePos.z);
     soundSource.scale.set(.1, .1, .1);
-    prev = soundSource.matrix.elements.slice();
+    previous = soundSource.matrix.elements.slice();
+    m.elements = previous;
     scene.add( soundSource );
     // var axes = new THREE.AxesHelper( 10 );
     // soundSource.add(axes);
@@ -553,11 +615,11 @@ function setupRoom() {
     // geometry.computeBoundingBox();
 
     // material
-    var material1 = new THREE.MeshPhongMaterial( {
-        color: 0xffffff, 
-        transparent: true,
-        opacity: .1
-    } );
+    // var material1 = new THREE.MeshPhongMaterial( {
+    //     color: 0xffffff, 
+    //     transparent: true,
+    //     opacity: .5
+    // } );
     
     // mesh
     // roomOuter = new THREE.Mesh( geometry, material1 );
